@@ -18,7 +18,9 @@ require('dotenv').config()
 const currencySymbol = process.env['CURRENCY_SYMBOL']
 const updateFrequency = process.env['UPDATE_FREQUENCY']
 const discordToken = process.env['DISCORD_TOKEN']
-const queryURL = `${process.env['BASE_URL']}${process.env['TOKEN_ID']}`
+const tokenQueryID = process.env['TOKEN_QUERY_ID']
+const queryURL = `${process.env['BASE_URL']}${tokenQueryID}`
+const tickerDisplayID = process.env['TICKER_DISPLAY_ID']
 
 // JSON getter and parser
 const axios = require(`axios`)
@@ -43,12 +45,12 @@ client.connect();
 function getPrices() {
 
     axios.get(`${queryURL}`).then(res => {
+        
         // If we got a valid response
-        if (res.data && res.data[0].current_price && res.data[0].price_change_percentage_24h) {
+        if (res.data && res.data[0].current_price && res.data[0].price_change_percentage_24h && res.data[0].last_updated) {
             let currentPrice = res.data[0].current_price || 0
             let priceChange = res.data[0].price_change_24h || 0
             let priceChangePercentage = res.data[0].price_change_percentage_24h || 0
-            let symbol = res.data[0].symbol || '?'
             let queryDate = res.data[0].last_updated || '---'
 
             var priceDirection
@@ -64,18 +66,19 @@ function getPrices() {
             console.log(`Price is ${currentPrice} as of ${queryDate.replace(`T`, ` `).replace(`Z`, ` UTC`)}`)
 
             // Construct the nickname then change bot's nickname (for each guild)
+            // i.e. "BTC -> $50,123.50"
             client.guilds.forEach(function (guild, guildID) {
 
-                // i.e. "LUV -> $0.0056"
                 options = { 
-                    nick: `LUV ${priceDirection} ${currencySymbol}${currentPrice.toFixed(4)}`
+                    nick: `${tickerDisplayID} ${priceDirection} ${currencySymbol}${currentPrice.toFixed(4)}`
                 }
-                client.editGuildMember(guildID, "@me", options)
+                client.editGuildMember(guildID, `@me`, options)
 
                 console.log(`  Updated guild ${guildID} (${guild.name})`)
             });
 
             // Construct the presence then change bot's nickname (for all guilds)
+            // i.e. "Watching -3500.25 (-1.03%)"
             activities = [{
                 name: `${priceChange.toFixed(4)} (${priceChangePercentage.toFixed(2)}%)`,
                 type: 3
@@ -84,7 +87,7 @@ function getPrices() {
 
         }
         else
-            console.log('Could not load price data for', COIN_ID)
+            console.log(`Could not load price data for ${tokenQueryID}`)
 
     }).catch(err => console.log('Error:', err))
 
