@@ -22,24 +22,8 @@ const tokenQueryID = process.env['TOKEN_QUERY_ID']
 const queryURL = `${process.env['BASE_URL']}${tokenQueryID}`
 const tickerDisplayID = process.env['TICKER_DISPLAY_ID']
 
-// Global variables for price display
-var priceText = ``
-var priceChangeText = ``
-
-// Webserver for keepalive
-const express = require('express');
-const server = express();
-port = process.env.PORT || 80
-// Request handler
-server.all(`/`, (req, res) => {
-    res.send(`${priceText}<br>${priceChangeText}`)
-})
-keepAlive()
-// Listener function
-function keepAlive(){
-    server.listen(port, ()=>{console.log(`Web server is ready and running.`)});
-}
-
+// Simple keepalive webserver for Kaffeine/Uptimebot pings
+require('http').createServer(function (req, res) { res.end(`Server is up`) }).listen(80)
 
 // JSON getter and parser
 const axios = require(`axios`)
@@ -50,7 +34,7 @@ const client = new Eris(`Bot ${discordToken}`, { intents: ["guilds"] });
 
 
 client.on(`ready`, () => {
-    console.log(`Bot ${client.user.id} Logged in as "${client.user.username}"`);
+    console.log(`Bot ${client.user.id} Logged in as "${client.user.username}"`)
     // Run the functionality (initial)
     getPrices()
     // Run the functionality (succeeding)
@@ -86,13 +70,10 @@ function getPrices() {
 
             // Construct the nickname then change bot's nickname (for each guild)
             // i.e. "BTC -> $50,123.50"
-            priceText = `${tickerDisplayID} ${priceDirection} ${currencySymbol}${currentPrice.toFixed(4)}`
-            priceChangeText = `${priceChange.toFixed(4)} (${priceChangePercentage.toFixed(2)}%)`
-
             client.guilds.forEach(function (guild, guildID) {
 
-                options = { 
-                    nick: `${priceText}`
+                options = {
+                    nick: `${tickerDisplayID} ${priceDirection} ${currencySymbol}${currentPrice.toFixed(4)}`
                 }
                 client.editGuildMember(guildID, `@me`, options)
 
@@ -102,7 +83,7 @@ function getPrices() {
             // Construct the presence then change bot's nickname (for all guilds)
             // i.e. "Watching -3500.25 (-1.03%)"
             activities = [{
-                name: `${priceChangeText}`,
+                name: `${priceChange.toFixed(4)} (${priceChangePercentage.toFixed(2)}%)`,
                 type: 3
             }]
             client.editStatus(`online`, activities)
