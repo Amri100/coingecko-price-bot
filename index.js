@@ -36,7 +36,7 @@ server.all(`/`, (req, res) => {
 keepAlive()
 // Listener function
 function keepAlive(){
-    server.listen(3000, ()=>{console.log(`Web server is ready and running.`)});
+    server.listen(80, ()=>{console.log(`Web server is ready and running.`)});
 }
 
 
