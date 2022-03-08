@@ -29,6 +29,7 @@ var priceChangeText = ``
 // Webserver for keepalive
 const express = require('express');
 const server = express();
+port = process.env.PORT || 80
 // Request handler
 server.all(`/`, (req, res) => {
     res.send(`${priceText}<br>${priceChangeText}`)
@@ -36,7 +37,7 @@ server.all(`/`, (req, res) => {
 keepAlive()
 // Listener function
 function keepAlive(){
-    server.listen(80, ()=>{console.log(`Web server is ready and running.`)});
+    server.listen(port, ()=>{console.log(`Web server is ready and running.`)});
 }
 
 
