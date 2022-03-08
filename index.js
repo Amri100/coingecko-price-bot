@@ -23,7 +23,8 @@ const queryURL = `${process.env['BASE_URL']}${tokenQueryID}`
 const tickerDisplayID = process.env['TICKER_DISPLAY_ID']
 
 // Simple keepalive webserver for Kaffeine/Uptimebot pings
-require('http').createServer(function (req, res) { res.end(`Server is up`) }).listen(80)
+require('http').createServer(function (req, res) { res.end(`Server is up`) })
+    .listen(process.env.PORT || 80)
 
 // JSON getter and parser
 const axios = require(`axios`)
