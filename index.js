@@ -22,6 +22,24 @@ const tokenQueryID = process.env['TOKEN_QUERY_ID']
 const queryURL = `${process.env['BASE_URL']}${tokenQueryID}`
 const tickerDisplayID = process.env['TICKER_DISPLAY_ID']
 
+// Global variables for price display
+var priceText = ``
+var priceChangeText = ``
+
+// Webserver for keepalive
+const express = require('express');
+const server = express();
+// Request handler
+server.all(`/`, (req, res) => {
+    res.send(`${priceText}<br>${priceChangeText}`)
+})
+keepAlive()
+// Listener function
+function keepAlive(){
+    server.listen(3000, ()=>{console.log(`Web server is ready and running.`)});
+}
+
+
 // JSON getter and parser
 const axios = require(`axios`)
 
@@ -30,7 +48,7 @@ const Eris = require(`eris`);
 const client = new Eris(`Bot ${discordToken}`, { intents: ["guilds"] });
 
 
-client.on("ready", () => {
+client.on(`ready`, () => {
     console.log(`Bot ${client.user.id} Logged in as "${client.user.username}"`);
     // Run the functionality (initial)
     getPrices()
@@ -45,7 +63,7 @@ client.connect();
 function getPrices() {
 
     axios.get(`${queryURL}`).then(res => {
-        
+
         // If we got a valid response
         if (res.data && res.data[0].current_price && res.data[0].price_change_percentage_24h && res.data[0].last_updated) {
             let currentPrice = res.data[0].current_price || 0
@@ -55,11 +73,11 @@ function getPrices() {
 
             var priceDirection
             if (priceChange < 0) {
-                priceDirection = "\u2197"
+                priceDirection = `\u2197`
             } else if (priceChange > 0) {
-                priceDirection = "\u2198"
+                priceDirection = `\u2198`
             } else {
-                priceDirection = "\u2192"
+                priceDirection = `\u2192`
             }
 
             console.log(`------------------------`)
@@ -67,10 +85,13 @@ function getPrices() {
 
             // Construct the nickname then change bot's nickname (for each guild)
             // i.e. "BTC -> $50,123.50"
+            priceText = `${tickerDisplayID} ${priceDirection} ${currencySymbol}${currentPrice.toFixed(4)}`
+            priceChangeText = `${priceChange.toFixed(4)} (${priceChangePercentage.toFixed(2)}%)`
+
             client.guilds.forEach(function (guild, guildID) {
 
                 options = { 
-                    nick: `${tickerDisplayID} ${priceDirection} ${currencySymbol}${currentPrice.toFixed(4)}`
+                    nick: `${priceText}`
                 }
                 client.editGuildMember(guildID, `@me`, options)
 
@@ -80,7 +101,7 @@ function getPrices() {
             // Construct the presence then change bot's nickname (for all guilds)
             // i.e. "Watching -3500.25 (-1.03%)"
             activities = [{
-                name: `${priceChange.toFixed(4)} (${priceChangePercentage.toFixed(2)}%)`,
+                name: `${priceChangeText}`,
                 type: 3
             }]
             client.editStatus(`online`, activities)
