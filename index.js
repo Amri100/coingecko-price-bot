@@ -58,9 +58,9 @@ function getPrices() {
             let queryDate = res.data[0].last_updated || '---'
 
             var priceDirection
-            if (priceChange < 0) {
+            if (parseFloat(priceChange) > 0) {
                 priceDirection = `\u2197`
-            } else if (priceChange > 0) {
+            } else if (parseFloat(priceChange) < 0) {
                 priceDirection = `\u2198`
             } else {
                 priceDirection = `\u2192`
