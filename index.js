@@ -85,7 +85,7 @@ function getPrices() {
             // Construct the presence then change bot's nickname (for all guilds)
             // i.e. "Watching -3500.25 (-1.03%)"
             activities = [{
-                name: `${priceChange.toFixed(4)} (${priceChangePercentage.toFixed(decimals)}%)`,
+                name: `${priceChange.toFixed(decimals)} (${priceChangePercentage.toFixed(2)}%)`,
                 type: 3
             }]
             client.editStatus(`online`, activities)
