@@ -16,6 +16,7 @@
 // Environment variables
 require('dotenv').config()
 const currencySymbol = process.env['CURRENCY_SYMBOL']
+const decimals = process.env['DECIMALS']
 const updateFrequency = process.env['UPDATE_FREQUENCY']
 const discordToken = process.env['DISCORD_TOKEN']
 const tokenQueryID = process.env['TOKEN_QUERY_ID']
@@ -74,7 +75,7 @@ function getPrices() {
             client.guilds.forEach(function (guild, guildID) {
 
                 options = {
-                    nick: `${tickerDisplayID} ${priceDirection} ${currencySymbol}${currentPrice.toFixed(4)}`
+                    nick: `${tickerDisplayID} ${priceDirection} ${currencySymbol}${currentPrice.toFixed(decimals)}`
                 }
                 client.editGuildMember(guildID, `@me`, options)
 
